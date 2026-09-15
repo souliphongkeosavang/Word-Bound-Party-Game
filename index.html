@@ -111,6 +111,14 @@
             background: rgba(99, 102, 241, 0.7);
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+    <style>
+      .online-mode-glow { box-shadow: 0 0 0 1px rgba(34,211,238,.25), 0 12px 30px rgba(8,145,178,.12); }
+      .online-answer-row { transition: .2s ease; }
+      .online-answer-row:hover { transform: translateY(-1px); }
+    </style>
 </head>
 <body class="h-full flex flex-col justify-between overflow-x-hidden select-none">
 
@@ -136,6 +144,11 @@
             <button onclick="toggleSettingsModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-gear text-indigo-400"></i>
                 <span class="hidden sm:inline">Game Options</span>
+            </button>
+
+            <button onclick="toggleOnlineModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-globe"></i>
+                <span class="hidden sm:inline">Online Mode</span>
             </button>
 
             <button onclick="toggleRulesModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-amber-300 hover:text-amber-200 border border-amber-500/30 flex items-center gap-2 transition-all">
@@ -230,7 +243,7 @@
                                 <input 
                                     type="text" 
                                     id="word-input" 
-                                    placeholder="Type word to check dictionary..." 
+                                    placeholder="Type your answer..." 
                                     autocomplete="off" 
                                     spellcheck="false" 
                                     class="w-full bg-slate-950/80 text-white font-mono font-bold tracking-wider px-4 py-2.5 rounded-xl border border-slate-700 focus:border-indigo-500 outline-none uppercase placeholder:text-slate-500 placeholder:normal-case placeholder:font-sans text-sm sm:text-base"
@@ -296,6 +309,49 @@
             </div>
         </div>
     </main>
+
+    <!-- Online Mode Modal -->
+    <div id="online-modal" class="hidden fixed inset-0 bg-slate-950/90 z-[60] flex items-center justify-center p-4">
+      <div class="glass-panel online-mode-glow w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl animate-pop-in">
+        <div class="flex justify-between items-center mb-5">
+          <div>
+            <h3 class="text-xl font-bold font-display text-white flex items-center gap-2"><i class="fa-solid fa-globe text-cyan-400"></i> Online Mode</h3>
+            <p class="text-xs text-slate-400 mt-1">เล่นข้ามเครื่องด้วย Room Code</p>
+          </div>
+          <button onclick="toggleOnlineModal()" class="w-8 h-8 rounded-xl glass-card text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="online-config-warning" class="hidden mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">ยังขาด Realtime Database URL — Party Mode ใช้ได้ตามปกติ แต่ Online Mode จะเชื่อมต่อไม่ได้</div>
+        <div id="online-entry" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button onclick="createOnlineRoom()" class="p-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-left font-bold transition-all">
+              <div class="text-base">สร้างห้อง</div><div class="text-[11px] text-cyan-100 mt-1">คุณเป็น Host และกำหนดโจทย์</div>
+            </button>
+            <button onclick="showJoinRoomPanel()" class="p-4 rounded-2xl glass-card border border-white/10 hover:bg-white/10 text-left font-bold transition-all">
+              <div class="text-base text-white">เข้าห้อง</div><div class="text-[11px] text-slate-400 mt-1">ใช้ Room Code จาก Host</div>
+            </button>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-900/70 border border-white/5">
+            <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2">ชื่อผู้เล่น</label>
+            <input id="online-player-name" maxlength="24" value="Player" class="w-full bg-slate-950/80 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none" placeholder="เช่น Alex">
+          </div>
+        </div>
+        <div id="join-panel" class="hidden space-y-3">
+          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400">Room Code</label>
+          <input id="join-room-code" maxlength="6" class="w-full uppercase bg-slate-950/80 text-white text-center text-2xl font-mono font-bold tracking-[.35em] px-4 py-3 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none" placeholder="ABC123">
+          <div class="flex gap-2"><button onclick="joinOnlineRoom()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl">Join Room</button><button onclick="backToOnlineEntry()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Back</button></div>
+        </div>
+        <div id="online-room-panel" class="hidden">
+          <div class="flex items-center justify-between gap-3 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
+            <div><div class="text-[10px] uppercase text-cyan-300 font-bold tracking-wider">Room Code</div><div id="online-room-code" class="font-mono text-3xl font-extrabold text-white tracking-[.25em]">------</div></div>
+            <button onclick="copyRoomCode()" class="px-3 py-2 rounded-xl bg-cyan-600/80 hover:bg-cyan-500 text-white text-xs font-bold"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+          <div class="mt-4 flex items-center justify-between"><div class="text-xs text-slate-400">ผู้เล่นในห้อง</div><div id="online-player-count" class="text-xs font-bold text-cyan-300">0</div></div>
+          <div id="online-player-list" class="mt-2 space-y-2 max-h-44 overflow-y-auto custom-scrollbar"></div>
+          <div class="mt-4 flex gap-2"><button id="host-start-online" onclick="startOnlineGame()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"><i class="fa-solid fa-play"></i> Start Game</button><button onclick="leaveOnlineRoom()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Leave</button></div>
+        </div>
+        <div id="online-status" class="mt-4 text-xs text-slate-400"></div>
+      </div>
+    </div>
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4">
@@ -471,6 +527,7 @@
             document.getElementById('db-counter').innerText = ENGLISH_WORDS.length.toLocaleString();
             renderTeams();
             nextPrompt();
+            initFirebaseOnline();
         });
 
         function pairHasMatch(startLetter, endLetter) {
@@ -525,6 +582,14 @@
                 resetTimer();
                 startTimer();
             }
+            syncOnlinePromptIfHost();
+        }
+
+        function syncOnlinePromptIfHost() {
+            if (!onlineState.active || !onlineState.host || !onlineState.roomRef) return;
+            onlineState.roomRef.child('state').set({ start: document.getElementById('start-char').innerText, end: document.getElementById('end-char').innerText, minLen: minWordLength, round: (onlineState.round || 0) + 1, phase: 'playing', updatedAt: firebase.database.ServerValue.TIMESTAMP });
+            onlineState.round = (onlineState.round || 0) + 1;
+            onlineState.roomRef.child('answers').remove();
         }
 
         function toggleAnswers() {
@@ -563,6 +628,7 @@
 
         function handleWordSubmit(event) {
             event.preventDefault();
+            if (onlineState.active) { submitOnlineAnswer(); return; }
             const input = document.getElementById('word-input');
             const val = input.value.trim().toUpperCase();
             const start = document.getElementById('start-char').innerText;
@@ -791,6 +857,148 @@
         function toggleRulesModal() {
             document.getElementById('rules-modal').classList.toggle('hidden');
         }
+
+        // ==============================
+        // ONLINE MODE (Firebase RTDB)
+        // ==============================
+        const FIREBASE_CONFIG = {
+          apiKey: "AIzaSyBWF_dYsWR_Vq7cPl2uV11A8RcxlKH4lVA",
+          authDomain: "word-bound-party.firebaseapp.com",
+          // Paste the exact Realtime Database URL from Firebase Console here.
+          // It will look like https://word-bound-party-default-rtdb.firebaseio.com
+          // or https://word-bound-party-default-rtdb.<region>.firebasedatabase.app
+          databaseURL: "https://word-bound-party-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "word-bound-party",
+          storageBucket: "word-bound-party.firebasestorage.app",
+          messagingSenderId: "734984785454",
+          appId: "1:734984785454:web:a60d62842a7ec411dc19bf",
+          measurementId: "G-7CWZK4SKZL"
+        };
+
+        const onlineState = { active:false, host:false, code:null, uid:null, round:0, roomRef:null, listeners:[] };
+
+        function firebaseConfigured() {
+          return Boolean(
+            FIREBASE_CONFIG.apiKey &&
+            !FIREBASE_CONFIG.apiKey.startsWith('PASTE_') &&
+            FIREBASE_CONFIG.projectId &&
+            !FIREBASE_CONFIG.projectId.startsWith('PASTE_') &&
+            FIREBASE_CONFIG.databaseURL
+          );
+        }
+
+        async function initFirebaseOnline() {
+          const warning = document.getElementById('online-config-warning');
+          if (!firebaseConfigured()) { warning.classList.remove('hidden'); return; }
+          try {
+            if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+            await firebase.auth().signInAnonymously();
+            onlineState.uid = firebase.auth().currentUser.uid;
+            setOnlineStatus('Firebase พร้อมใช้งาน');
+          } catch (e) {
+            console.error(e);
+            setOnlineStatus('เชื่อมต่อ Firebase ไม่สำเร็จ: ' + e.message);
+          }
+        }
+
+        function setOnlineStatus(text) { const el=document.getElementById('online-status'); if(el) el.textContent=text; }
+        function toggleOnlineModal() { document.getElementById('online-modal').classList.toggle('hidden'); }
+        function showJoinRoomPanel(){ document.getElementById('online-entry').classList.add('hidden'); document.getElementById('join-panel').classList.remove('hidden'); document.getElementById('join-room-code').focus(); }
+        function backToOnlineEntry(){ document.getElementById('join-panel').classList.add('hidden'); document.getElementById('online-entry').classList.remove('hidden'); }
+        function makeRoomCode(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
+        function safeName(){ return (document.getElementById('online-player-name').value.trim() || 'Player').slice(0,24); }
+
+        async function createOnlineRoom(){
+          if(!firebaseConfigured() || !firebase.database) { setOnlineStatus('กรุณาใส่ Firebase Config ก่อน'); return; }
+          if(!onlineState.uid) { await initFirebaseOnline(); }
+          const code=makeRoomCode();
+          onlineState.active=true; onlineState.host=true; onlineState.code=code; onlineState.round=0;
+          onlineState.roomRef=firebase.database().ref('wordBoundRooms/'+code);
+          await onlineState.roomRef.set({ createdAt: firebase.database.ServerValue.TIMESTAMP, hostUid:onlineState.uid, state:{start:'S',end:'T',minLen:minWordLength,round:0,phase:'lobby'}, players:{ [onlineState.uid]:{ name:safeName(), score:0, host:true } } });
+          showRoomPanel(); attachRoomListeners(); setOnlineStatus('สร้างห้องแล้ว — ส่ง Room Code ให้เพื่อน');
+        }
+
+        async function joinOnlineRoom(){
+          if(!firebaseConfigured() || !firebase.database) { setOnlineStatus('กรุณาใส่ Firebase Config ก่อน'); return; }
+          if(!onlineState.uid) { await initFirebaseOnline(); }
+          const code=document.getElementById('join-room-code').value.trim().toUpperCase();
+          if(!/^[A-Z0-9]{6}$/.test(code)) { setOnlineStatus('Room Code ต้องมี 6 ตัวอักษร'); return; }
+          const ref=firebase.database().ref('wordBoundRooms/'+code);
+          const snap=await ref.once('value');
+          if(!snap.exists()) { setOnlineStatus('ไม่พบห้องนี้'); return; }
+          onlineState.active=true; onlineState.host=false; onlineState.code=code; onlineState.roomRef=ref;
+          await ref.child('players/'+onlineState.uid).set({ name:safeName(), score:0, host:false });
+          showRoomPanel(); attachRoomListeners(); setOnlineStatus('เข้าห้องแล้ว — รอ Host เริ่มเกม');
+        }
+
+        function showRoomPanel(){ document.getElementById('online-entry').classList.add('hidden'); document.getElementById('join-panel').classList.add('hidden'); document.getElementById('online-room-panel').classList.remove('hidden'); document.getElementById('online-room-code').textContent=onlineState.code; document.getElementById('host-start-online').classList.toggle('hidden', !onlineState.host); }
+
+        function attachRoomListeners(){
+          onlineState.listeners.forEach(u=>u()); onlineState.listeners=[];
+          const pRef=onlineState.roomRef.child('players');
+          const sRef=onlineState.roomRef.child('state');
+          const onPlayers=snap=>renderOnlinePlayers(snap.val()||{});
+          const onState=snap=>{ const st=snap.val(); if(!st) return; applyOnlineState(st); };
+          pRef.on('value',onPlayers); sRef.on('value',onState);
+          onlineState.listeners.push(()=>pRef.off('value',onPlayers),()=>sRef.off('value',onState));
+          if(onlineState.host){ const aRef=onlineState.roomRef.child('answers'); const onAnswers=s=>renderOnlineAnswers(s.val()||{}); aRef.on('value',onAnswers); onlineState.listeners.push(()=>aRef.off('value',onAnswers)); }
+        }
+
+        function renderOnlinePlayers(players){
+          const arr=Object.entries(players).map(([uid,p])=>({uid,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+          document.getElementById('online-player-count').textContent=arr.length;
+          document.getElementById('online-player-list').innerHTML=arr.map(p=>`<div class="online-answer-row flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-white/5"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-300 flex items-center justify-center text-xs font-bold">${(p.name||'P').slice(0,1).toUpperCase()}</span><span class="text-sm font-semibold text-slate-200">${escapeHtml(p.name||'Player')}${p.host?' <span class="text-[9px] text-amber-300">HOST</span>':''}</span></div><span class="font-mono font-bold text-amber-300">${p.score||0}</span></div>`).join('');
+        }
+
+        function applyOnlineState(st){
+          onlineState.round=st.round||0;
+          const sc=document.getElementById('start-char'), ec=document.getElementById('end-char');
+          if(sc && ec && st.start && st.end && (sc.innerText!==st.start || ec.innerText!==st.end)){ sc.innerText=st.start; ec.innerText=st.end; document.getElementById('answers-panel').classList.add('hidden'); document.getElementById('word-input').value=''; document.getElementById('verifier-feedback').classList.add('hidden'); playSound('pop'); }
+          if(typeof st.minLen==='number' && st.minLen!==minWordLength) setMinWordLength(st.minLen);
+          const startBtn=document.getElementById('host-start-online'); if(startBtn) startBtn.disabled=!onlineState.host || st.phase!=='lobby';
+          setOnlineStatus(st.phase==='playing'?'กำลังเล่นรอบ '+(st.round||1):'รอเริ่มเกม');
+        }
+
+        function startOnlineGame(){ if(!onlineState.host || !onlineState.roomRef) return; nextPrompt(); }
+
+        async function submitOnlineAnswer(){
+          if(!onlineState.roomRef || !onlineState.uid) return;
+          const input=document.getElementById('word-input'); const val=input.value.trim().toUpperCase(); if(!val) return;
+          const start=document.getElementById('start-char').innerText, end=document.getElementById('end-char').innerText;
+          const feedback=document.getElementById('verifier-feedback'); feedback.classList.remove('hidden');
+          const valid=val.startsWith(start)&&val.endsWith(end)&&(minWordLength===0||val.length>=minWordLength)&&ENGLISH_WORDS.includes(val.toLowerCase());
+          if(!valid){ feedback.className='mt-2 text-xs font-semibold text-rose-400 flex items-center gap-1.5'; feedback.innerHTML='<i class="fa-solid fa-circle-xmark"></i> คำตอบไม่ผ่านเงื่อนไขรอบนี้'; playSound('error'); return; }
+          const answerRef=onlineState.roomRef.child('answers/'+onlineState.uid);
+          const existing=await answerRef.once('value'); if(existing.exists()){ feedback.className='mt-2 text-xs font-semibold text-amber-300 flex items-center gap-1.5'; feedback.innerHTML='<i class="fa-solid fa-info-circle"></i> คุณส่งคำตอบรอบนี้ไปแล้ว'; return; }
+          await answerRef.set({ name:safeName(), word:val, round:onlineState.round, valid:true, timestamp:firebase.database.ServerValue.TIMESTAMP });
+          feedback.className='mt-2 text-xs font-semibold text-emerald-400 flex items-center gap-1.5'; feedback.innerHTML='<i class="fa-solid fa-circle-check"></i> ส่งคำตอบสำเร็จ! รอการให้คะแนน'; playSound('success');
+        }
+
+        function renderOnlineAnswers(answers){
+          if(!onlineState.host) return;
+          const panel=document.getElementById('answers-panel'), list=document.getElementById('answers-list'), badge=document.getElementById('answers-count-badge');
+          const arr=Object.entries(answers).map(([uid,a])=>({uid,...a})).filter(a=>a.round===onlineState.round);
+          arr.forEach(a=>{ if(a.valid && !a.awarded && !a.scoring) { onlineState.roomRef.child('answers/'+a.uid+'/scoring').set(true); awardOnlinePoint(a.uid); } });
+          badge.innerText=`${arr.length} Answer${arr.length===1?'':'s'}`;
+          list.innerHTML=arr.map(a=>`<div class="w-full flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-950/70 border ${a.awarded?'border-emerald-500/20':'border-amber-500/20'}"><div class="text-left"><div class="text-xs font-bold text-white">${escapeHtml(a.name||'Player')}</div><div class="font-mono text-sm ${a.awarded?'text-emerald-300':'text-amber-300'}">${escapeHtml(a.word)}</div></div><span class="text-[10px] font-bold ${a.awarded?'text-emerald-300':'text-slate-500'}">${a.awarded?'SCORED +1':'CHECKING'}</span></div>`).join('') || '<div class="text-xs text-slate-500 py-3">ยังไม่มีคำตอบในรอบนี้</div>';
+          panel.classList.remove('hidden');
+        }
+
+        async function awardOnlinePoint(uid){
+          if(!onlineState.host) return;
+          const aRef=onlineState.roomRef.child('answers/'+uid);
+          const snap=await aRef.once('value'); const ans=snap.val();
+          if(!ans || ans.awarded || ans.round!==onlineState.round) return;
+          const ref=onlineState.roomRef.child('players/'+uid+'/score');
+          await ref.transaction(v=>(v||0)+1);
+          await aRef.update({awarded:true,scoring:null});
+          playSound('success'); if(typeof confetti==='function') confetti({particleCount:50,spread:70,origin:{y:.7}});
+        }
+
+        function copyRoomCode(){ navigator.clipboard?.writeText(onlineState.code||''); setOnlineStatus('คัดลอก Room Code แล้ว'); }
+        async function leaveOnlineRoom(){ try{ if(onlineState.roomRef&&onlineState.uid) await onlineState.roomRef.child('players/'+onlineState.uid).remove(); }catch(e){} onlineState.listeners.forEach(u=>u()); Object.assign(onlineState,{active:false,host:false,code:null,roomRef:null,round:0,listeners:[]}); document.getElementById('online-room-panel').classList.add('hidden'); document.getElementById('online-entry').classList.remove('hidden'); document.getElementById('join-panel').classList.add('hidden'); toggleOnlineModal(); setOnlineStatus('ออกจากห้องแล้ว'); }
+        function escapeHtml(v){ return String(v).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m])); }
+
     </script>
 </body>
 </html>
