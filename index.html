@@ -122,6 +122,37 @@
 </head>
 <body class="h-full flex flex-col justify-between overflow-x-hidden select-none">
 
+    <section id="mode-select-screen" class="fixed inset-0 z-[80] bg-slate-950 flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 mx-auto mb-4">
+                    <i class="fa-solid font-bold text-white text-2xl">W</i>
+                </div>
+                <h2 class="font-display text-4xl sm:text-5xl font-extrabold text-white">WORD BOUND</h2>
+                <p class="text-slate-400 text-sm mt-2">Choose how you want to play</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="enterPartyMode()" class="text-left p-6 sm:p-7 rounded-3xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-300/30 shadow-xl shadow-indigo-950/40 transition-all active:scale-[.99]">
+                    <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center mb-5">
+                        <i class="fa-solid fa-people-group text-white text-xl"></i>
+                    </div>
+                    <div class="font-display text-2xl font-bold text-white">Party Mode</div>
+                    <div class="text-indigo-100 text-sm mt-2">Play together on one screen with local teams and quick controls.</div>
+                </button>
+
+                <button onclick="openOnlineSetupFromLanding()" class="text-left p-6 sm:p-7 rounded-3xl bg-cyan-700 hover:bg-cyan-600 border border-cyan-300/30 shadow-xl shadow-cyan-950/40 transition-all active:scale-[.99]">
+                    <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center mb-5">
+                        <i class="fa-solid fa-globe text-white text-xl"></i>
+                    </div>
+                    <div class="font-display text-2xl font-bold text-white">Online Mode</div>
+                    <div class="text-cyan-100 text-sm mt-2">Create or join a room. Host settings are locked before play starts.</div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
     <header class="w-full max-w-5xl mx-auto px-4 pt-4 pb-2 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -129,7 +160,7 @@
             </div>
             <div>
                 <h1 class="font-display font-extrabold text-2xl tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-pink-300 to-amber-200">
-                    WORD BOUND <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 ml-1">PARTY</span>
+                    WORD BOUND
                 </h1>
                 <p class="text-xs text-indigo-200/60 font-light -mt-1">Shout Out Word Game &bull; Pure Random A-Z Edition</p>
             </div>
@@ -141,16 +172,10 @@
                 <span id="sound-text" class="hidden sm:inline">Sound: ON</span>
             </button>
             
-            <button onclick="toggleSettingsModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 flex items-center gap-2 transition-all">
+            <button id="settings-btn" onclick="toggleSettingsModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-gear text-indigo-400"></i>
                 <span class="hidden sm:inline">Game Options</span>
             </button>
-
-            <button onclick="toggleOnlineModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 flex items-center gap-2 transition-all">
-                <i class="fa-solid fa-globe"></i>
-                <span class="hidden sm:inline">Online Mode</span>
-            </button>
-
             <button onclick="toggleRulesModal()" class="px-3 py-1.5 rounded-xl glass-card text-xs font-medium text-amber-300 hover:text-amber-200 border border-amber-500/30 flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-circle-question"></i>
                 <span>How to Play</span>
@@ -167,7 +192,7 @@
                         <span id="mode-badge" class="text-[10px] text-indigo-300 uppercase tracking-wider block font-semibold">Timer (Classic)</span>
                         <div id="timer-display" class="font-display font-bold text-2xl sm:text-3xl text-amber-400 leading-none">30s</div>
                     </div>
-                    <div class="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-3">
+                    <div id="timer-action-controls" class="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-3">
                         <button id="timer-toggle-btn" onclick="toggleTimer()" class="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-md transition-all active:scale-95">
                             <i id="timer-toggle-icon" class="fa-solid fa-play text-xs"></i>
                         </button>
@@ -188,7 +213,7 @@
                         <span id="db-counter" class="font-mono font-bold text-indigo-200">0</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-2xl border border-white/5 text-xs">
+                    <div id="timer-preset-controls" class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-2xl border border-white/5 text-xs">
                         <span class="text-[10px] text-slate-400 px-1 uppercase tracking-wider">Set:</span>
                         <button id="preset-10" onclick="setTimerPreset(10)" class="px-2.5 py-1 rounded-xl glass-card hover:bg-white/10 transition-all font-semibold text-slate-300">10s</button>
                         <button id="preset-30" onclick="setTimerPreset(30)" class="px-2.5 py-1 rounded-xl bg-indigo-600 font-semibold text-white shadow-md">30s</button>
@@ -291,7 +316,7 @@
                 <div id="answers-list" class="flex flex-wrap items-center justify-center gap-2 pt-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
             </div>
 
-            <div class="mt-8 pt-6 border-t border-white/10">
+            <div id="party-scoreboard-section" class="mt-8 pt-6 border-t border-white/10">
                 <div class="flex justify-between items-center mb-4 max-w-2xl mx-auto">
                     <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-2">
                         <i class="fa-solid fa-trophy text-amber-400"></i> Party Teams Scoreboard
@@ -309,39 +334,93 @@
                     </button>
                 </div>
             </div>
+
+            <div id="online-scoreboard-section" class="hidden mt-8 pt-6 border-t border-white/10">
+                <div class="flex justify-between items-center mb-4 max-w-2xl mx-auto">
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-cyan-400"></i> Online Players
+                    </div>
+                    <div id="main-online-player-count" class="text-xs font-bold text-cyan-300">0</div>
+                </div>
+                <div id="main-online-player-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-w-3xl mx-auto"></div>
+            </div>
         </div>
     </main>
 
     <!-- Online Mode Modal -->
     <div id="online-modal" class="hidden fixed inset-0 bg-slate-950/90 z-[60] flex items-center justify-center p-4">
-      <div class="glass-panel online-mode-glow w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl animate-pop-in">
+      <div class="glass-panel online-mode-glow w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl animate-pop-in max-h-[92vh] overflow-y-auto custom-scrollbar">
         <div class="flex justify-between items-center mb-5">
           <div>
-            <h3 class="text-xl font-bold font-display text-white flex items-center gap-2"><i class="fa-solid fa-globe text-cyan-400"></i> Online Mode</h3>
-            <p class="text-xs text-slate-400 mt-1">เล่นข้ามเครื่องด้วย Room Code</p>
+            <h3 class="text-xl font-bold font-display text-white flex items-center gap-2"><i class="fa-solid fa-globe text-cyan-400"></i> Online Setup</h3>
+            <p class="text-xs text-slate-400 mt-1">ตั้งชื่อ เลือก Host หรือ Join แล้วค่อยเข้าหน้าเกม</p>
           </div>
-          <button onclick="toggleOnlineModal()" class="w-8 h-8 rounded-xl glass-card text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+          <button onclick="closeOnlineSetup()" class="w-8 h-8 rounded-xl glass-card text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
+
         <div id="online-config-warning" class="hidden mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">ยังขาด Realtime Database URL — Party Mode ใช้ได้ตามปกติ แต่ Online Mode จะเชื่อมต่อไม่ได้</div>
+
         <div id="online-entry" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button onclick="createOnlineRoom()" class="p-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-left font-bold transition-all">
-              <div class="text-base">สร้างห้อง</div><div class="text-[11px] text-cyan-100 mt-1">คุณเป็น Host และกำหนดโจทย์</div>
-            </button>
-            <button onclick="showJoinRoomPanel()" class="p-4 rounded-2xl glass-card border border-white/10 hover:bg-white/10 text-left font-bold transition-all">
-              <div class="text-base text-white">เข้าห้อง</div><div class="text-[11px] text-slate-400 mt-1">ใช้ Room Code จาก Host</div>
-            </button>
-          </div>
           <div class="p-3 rounded-2xl bg-slate-900/70 border border-white/5">
             <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2">ชื่อผู้เล่น</label>
             <input id="online-player-name" maxlength="24" value="Player" class="w-full bg-slate-950/80 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none" placeholder="เช่น Alex">
           </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button onclick="showHostSetupPanel()" class="p-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-left font-bold transition-all">
+              <div class="text-base">Host Room</div><div class="text-[11px] text-cyan-100 mt-1">ตั้งค่ากติกาแล้วสร้างห้อง</div>
+            </button>
+            <button onclick="showJoinRoomPanel()" class="p-4 rounded-2xl glass-card border border-white/10 hover:bg-white/10 text-left font-bold transition-all">
+              <div class="text-base text-white">Join Room</div><div class="text-[11px] text-slate-400 mt-1">ใช้ Room Code จาก Host</div>
+            </button>
+          </div>
         </div>
+
+        <div id="host-setup-panel" class="hidden space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/5 space-y-4">
+            <div>
+              <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2">Timer Gameplay Mode</label>
+              <select id="online-setup-mode" class="w-full bg-slate-950/80 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none">
+                <option value="classic">Classic - manual next prompt</option>
+                <option value="marathon">Marathon - auto-next on timeout</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2">Round Timer</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button id="online-timer-10" onclick="setOnlineSetupTimer(10)" class="py-2 rounded-xl border glass-card border-white/10 text-slate-300 font-bold">10s</button>
+                <button id="online-timer-30" onclick="setOnlineSetupTimer(30)" class="py-2 rounded-xl border bg-cyan-600 border-cyan-400 text-white font-bold">30s</button>
+                <button id="online-timer-60" onclick="setOnlineSetupTimer(60)" class="py-2 rounded-xl border glass-card border-white/10 text-slate-300 font-bold">60s</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2">Minimum Character Count</label>
+              <select id="online-setup-minlen" class="w-full bg-slate-950/80 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none">
+                <option value="0">Any length</option>
+                <option value="4">Char 4+</option>
+                <option value="5">Char 5+</option>
+                <option value="6">Char 6+</option>
+              </select>
+            </div>
+            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-950/70 border border-white/5 cursor-pointer">
+              <span>
+                <span class="block font-semibold text-white">Enable Word Verifier Box</span>
+                <span class="block text-xs text-slate-400">ON: players must submit words. OFF: host scores manually.</span>
+              </span>
+              <input id="online-setup-verifier" type="checkbox" checked class="w-5 h-5 accent-cyan-500">
+            </label>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="createOnlineRoom()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl">Create Room</button>
+            <button onclick="backToOnlineEntry()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Back</button>
+          </div>
+        </div>
+
         <div id="join-panel" class="hidden space-y-3">
           <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400">Room Code</label>
           <input id="join-room-code" maxlength="6" class="w-full uppercase bg-slate-950/80 text-white text-center text-2xl font-mono font-bold tracking-[.35em] px-4 py-3 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none" placeholder="ABC123">
           <div class="flex gap-2"><button onclick="joinOnlineRoom()" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl">Join Room</button><button onclick="backToOnlineEntry()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Back</button></div>
         </div>
+
         <div id="online-room-panel" class="hidden">
           <div class="flex items-center justify-between gap-3 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
             <div><div class="text-[10px] uppercase text-cyan-300 font-bold tracking-wider">Room Code</div><div id="online-room-code" class="font-mono text-3xl font-extrabold text-white tracking-[.25em]">------</div></div>
@@ -349,7 +428,7 @@
           </div>
           <div class="mt-4 flex items-center justify-between"><div class="text-xs text-slate-400">ผู้เล่นในห้อง</div><div id="online-player-count" class="text-xs font-bold text-cyan-300">0</div></div>
           <div id="online-player-list" class="mt-2 space-y-2 max-h-44 overflow-y-auto custom-scrollbar"></div>
-          <div class="mt-4 flex gap-2"><button id="host-start-online" onclick="startOnlineGame()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"><i class="fa-solid fa-play"></i> Start Game</button><button onclick="leaveOnlineRoom()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Leave</button></div>
+          <div class="mt-4 flex gap-2"><button id="host-start-online" onclick="enterOnlineGame()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"><i class="fa-solid fa-right-to-bracket"></i> Enter</button><button onclick="leaveOnlineRoom()" class="px-4 py-3 glass-card rounded-xl text-slate-300">Leave</button></div>
         </div>
         <div id="online-status" class="mt-4 text-xs text-slate-400"></div>
       </div>
@@ -519,6 +598,9 @@
         let gameMode = 'classic';
         let minWordLength = 0;
         let spellingCheckEnabled = true;
+        let appMode = 'select';
+        let onlineSetupTimer = 30;
+        let firebaseServerOffset = 0;
 
         let teams = [
             { id: 1, name: 'Team Alpha', score: 0, color: 'from-indigo-500 to-indigo-700' },
@@ -529,8 +611,52 @@
             document.getElementById('db-counter').innerText = ENGLISH_WORDS.length.toLocaleString();
             renderTeams();
             nextPrompt();
+            updateGameSurfaceForMode();
             initFirebaseOnline();
         });
+
+
+        function enterPartyMode() {
+            appMode = 'party';
+            onlineState.active = false;
+            document.getElementById('mode-select-screen').classList.add('hidden');
+            updateGameSurfaceForMode();
+        }
+
+        function openOnlineSetupFromLanding() {
+            appMode = 'online-setup';
+            document.getElementById('mode-select-screen').classList.add('hidden');
+            updateGameSurfaceForMode();
+            toggleOnlineModal(true);
+        }
+
+        function updateGameSurfaceForMode() {
+            const isOnline = appMode === 'online-game' || onlineState.active;
+            document.getElementById('settings-btn')?.classList.toggle('hidden', isOnline);
+            document.getElementById('timer-preset-controls')?.classList.toggle('hidden', isOnline);
+            document.getElementById('timer-action-controls')?.classList.toggle('hidden', isOnline);
+            document.getElementById('party-scoreboard-section')?.classList.toggle('hidden', isOnline);
+            document.getElementById('online-scoreboard-section')?.classList.toggle('hidden', !isOnline);
+            document.getElementById('sample-answers-btn')?.classList.toggle('hidden', isOnline);
+            document.getElementById('answers-panel')?.classList.add('hidden');
+            updateOnlineControls();
+        }
+
+        function closeOnlineSetup() {
+            document.getElementById('online-modal').classList.add('hidden');
+            if (!onlineState.active && appMode === 'online-setup') {
+                document.getElementById('mode-select-screen').classList.remove('hidden');
+                appMode = 'select';
+                updateGameSurfaceForMode();
+            }
+        }
+
+        function enterOnlineGame() {
+            appMode = 'online-game';
+            document.getElementById('online-modal').classList.add('hidden');
+            updateGameSurfaceForMode();
+            setOnlineStatus(onlineState.host ? 'Host พร้อมแล้ว — กด NEXT WORD เพื่อเริ่มรอบ' : 'เข้าห้องแล้ว — รอ Host เริ่มรอบ');
+        }
 
         function pairHasMatch(startLetter, endLetter) {
             const s = startLetter.toLowerCase();
@@ -610,6 +736,8 @@
                 round: nextRound,
                 phase: 'playing',
                 duration: defaultTimer,
+                mode: gameMode,
+                verifier: spellingCheckEnabled,
                 startedAt: firebase.database.ServerValue.TIMESTAMP,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
             });
@@ -937,6 +1065,7 @@
           if (!firebaseConfigured()) { warning.classList.remove('hidden'); return; }
           try {
             if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+            firebase.database().ref('.info/serverTimeOffset').on('value', snap => { firebaseServerOffset = snap.val() || 0; });
             await firebase.auth().signInAnonymously();
             onlineState.uid = firebase.auth().currentUser.uid;
             setOnlineStatus('Firebase พร้อมใช้งาน');
@@ -947,16 +1076,66 @@
         }
 
         function setOnlineStatus(text) { const el=document.getElementById('online-status'); if(el) el.textContent=text; }
-        function toggleOnlineModal() { document.getElementById('online-modal').classList.toggle('hidden'); }
-        function showJoinRoomPanel(){ document.getElementById('online-entry').classList.add('hidden'); document.getElementById('join-panel').classList.remove('hidden'); document.getElementById('join-room-code').focus(); }
-        function backToOnlineEntry(){ document.getElementById('join-panel').classList.add('hidden'); document.getElementById('online-entry').classList.remove('hidden'); }
+        function toggleOnlineModal(forceOpen) {
+          const modal=document.getElementById('online-modal');
+          if(forceOpen === true) modal.classList.remove('hidden');
+          else if(forceOpen === false) modal.classList.add('hidden');
+          else modal.classList.toggle('hidden');
+        }
+        function showHostSetupPanel(){
+          document.getElementById('online-entry').classList.add('hidden');
+          document.getElementById('host-setup-panel').classList.remove('hidden');
+          document.getElementById('join-panel').classList.add('hidden');
+        }
+        function showJoinRoomPanel(){
+          document.getElementById('online-entry').classList.add('hidden');
+          document.getElementById('host-setup-panel').classList.add('hidden');
+          document.getElementById('join-panel').classList.remove('hidden');
+          document.getElementById('join-room-code').focus();
+        }
+        function backToOnlineEntry(){
+          document.getElementById('join-panel').classList.add('hidden');
+          document.getElementById('host-setup-panel').classList.add('hidden');
+          document.getElementById('online-room-panel').classList.add('hidden');
+          document.getElementById('online-entry').classList.remove('hidden');
+        }
         function makeRoomCode(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
         function safeName(){ return (document.getElementById('online-player-name').value.trim() || 'Player').slice(0,24); }
-
+        function setOnlineSetupTimer(seconds){
+          onlineSetupTimer=seconds;
+          ['10','30','60'].forEach(s=>{
+            const btn=document.getElementById('online-timer-'+s);
+            if(!btn) return;
+            btn.className=parseInt(s)===seconds
+              ? 'py-2 rounded-xl border bg-cyan-600 border-cyan-400 text-white font-bold'
+              : 'py-2 rounded-xl border glass-card border-white/10 text-slate-300 font-bold';
+          });
+        }
+        function readOnlineSetupOptions(){
+          return {
+            mode: document.getElementById('online-setup-mode').value,
+            duration: onlineSetupTimer,
+            minLen: parseInt(document.getElementById('online-setup-minlen').value, 10),
+            verifier: document.getElementById('online-setup-verifier').checked
+          };
+        }
+        function applyOnlineRoomSettings(settings){
+          if(!settings) return;
+          if(settings.mode) applyRemoteGameMode(settings.mode);
+          if(typeof settings.duration === 'number') {
+            defaultTimer = settings.duration;
+            if(onlineState.phase !== 'playing') currentTimer = defaultTimer;
+            updateTimerDisplay();
+          }
+          if(typeof settings.minLen === 'number') applyRemoteMinWordLength(settings.minLen);
+          if(typeof settings.verifier === 'boolean') applyRemoteVerifier(settings.verifier);
+        }
         async function createOnlineRoom(){
           if(!firebaseConfigured() || !firebase.database) { setOnlineStatus('กรุณาใส่ Firebase Config ก่อน'); return; }
           if(!onlineState.uid) { await initFirebaseOnline(); }
           if(!onlineState.uid) { setOnlineStatus('ยัง sign in Firebase ไม่สำเร็จ'); return; }
+          const settings = readOnlineSetupOptions();
+          applyOnlineRoomSettings(settings);
           let code=null, ref=null;
           for(let i=0;i<10;i++){
             const candidate=makeRoomCode();
@@ -967,9 +1146,9 @@
           if(!code){ setOnlineStatus('สร้าง Room Code ไม่สำเร็จ ลองใหม่อีกครั้ง'); return; }
           onlineState.active=true; onlineState.host=true; onlineState.code=code; onlineState.round=0; onlineState.phase='lobby';
           onlineState.roomRef=ref;
-          await onlineState.roomRef.set({ createdAt: firebase.database.ServerValue.TIMESTAMP, hostUid:onlineState.uid, state:{start:document.getElementById('start-char').innerText,end:document.getElementById('end-char').innerText,minLen:minWordLength,round:0,phase:'lobby',duration:defaultTimer}, players:{ [onlineState.uid]:{ name:safeName(), score:0, host:true, joinedAt:firebase.database.ServerValue.TIMESTAMP } } });
+          await onlineState.roomRef.set({ createdAt: firebase.database.ServerValue.TIMESTAMP, hostUid:onlineState.uid, settings, state:{start:document.getElementById('start-char').innerText,end:document.getElementById('end-char').innerText,minLen:settings.minLen,round:0,phase:'lobby',duration:settings.duration,verifier:settings.verifier,mode:settings.mode}, players:{ [onlineState.uid]:{ name:safeName(), score:0, host:true, joinedAt:firebase.database.ServerValue.TIMESTAMP } } });
           onlineState.roomRef.child('players/'+onlineState.uid).onDisconnect().remove();
-          showRoomPanel(); attachRoomListeners(); setOnlineStatus('สร้างห้องแล้ว — ส่ง Room Code ให้เพื่อน');
+          showRoomPanel(); attachRoomListeners(); updateGameSurfaceForMode(); setOnlineStatus('สร้างห้องแล้ว — ส่ง Room Code ให้เพื่อน แล้วกด Enter เพื่อเข้าหน้าเกม');
         }
 
         async function joinOnlineRoom(){
@@ -982,12 +1161,14 @@
           const snap=await ref.once('value');
           if(!snap.exists()) { setOnlineStatus('ไม่พบห้องนี้'); return; }
           onlineState.active=true; onlineState.host=false; onlineState.code=code; onlineState.roomRef=ref;
+          const room=snap.val() || {};
+          applyOnlineRoomSettings(room.settings || room.state || {});
           await ref.child('players/'+onlineState.uid).set({ name:safeName(), score:0, host:false, joinedAt:firebase.database.ServerValue.TIMESTAMP });
           ref.child('players/'+onlineState.uid).onDisconnect().remove();
-          showRoomPanel(); attachRoomListeners(); setOnlineStatus('เข้าห้องแล้ว — รอ Host เริ่มเกม');
+          showRoomPanel(); attachRoomListeners(); updateGameSurfaceForMode(); setOnlineStatus('เข้าห้องแล้ว — กด Enter เพื่อเข้าหน้าเกม');
         }
 
-        function showRoomPanel(){ document.getElementById('online-entry').classList.add('hidden'); document.getElementById('join-panel').classList.add('hidden'); document.getElementById('online-room-panel').classList.remove('hidden'); document.getElementById('online-room-code').textContent=onlineState.code; document.getElementById('host-start-online').classList.toggle('hidden', !onlineState.host); }
+        function showRoomPanel(){ document.getElementById('online-entry').classList.add('hidden'); document.getElementById('host-setup-panel').classList.add('hidden'); document.getElementById('join-panel').classList.add('hidden'); document.getElementById('online-room-panel').classList.remove('hidden'); document.getElementById('online-room-code').textContent=onlineState.code; }
 
         function attachRoomListeners(){
           onlineState.listeners.forEach(u=>u()); onlineState.listeners=[];
@@ -1002,8 +1183,23 @@
 
         function renderOnlinePlayers(players){
           const arr=Object.entries(players).map(([uid,p])=>({uid,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
-          document.getElementById('online-player-count').textContent=arr.length;
-          document.getElementById('online-player-list').innerHTML=arr.map(p=>`<div class="online-answer-row flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-white/5"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-300 flex items-center justify-center text-xs font-bold">${(p.name||'P').slice(0,1).toUpperCase()}</span><span class="text-sm font-semibold text-slate-200">${escapeHtml(p.name||'Player')}${p.host?' <span class="text-[9px] text-amber-300">HOST</span>':''}</span></div><span class="font-mono font-bold text-amber-300">${p.score||0}</span></div>`).join('');
+          const modalCount=document.getElementById('online-player-count');
+          const mainCount=document.getElementById('main-online-player-count');
+          if(modalCount) modalCount.textContent=arr.length;
+          if(mainCount) mainCount.textContent=arr.length + ' players';
+          const modalRows=arr.map(p=>`<div class="online-answer-row flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-white/5"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-300 flex items-center justify-center text-xs font-bold">${(p.name||'P').slice(0,1).toUpperCase()}</span><span class="text-sm font-semibold text-slate-200">${escapeHtml(p.name||'Player')}${p.host?' <span class="text-[9px] text-amber-300">HOST</span>':''}</span></div><span class="font-mono font-bold text-amber-300">${p.score||0}</span></div>`).join('');
+          const manualControls=(p)=> onlineState.host && !spellingCheckEnabled ? `<div class="flex items-center gap-1"><button onclick="awardManualOnlinePoint('${p.uid}',-1)" class="w-7 h-7 rounded-lg glass-card text-rose-400">-</button><button onclick="awardManualOnlinePoint('${p.uid}',1)" class="w-8 h-7 rounded-lg bg-cyan-600 text-white font-bold">+1</button></div>` : '';
+          const mainRows=arr.map(p=>`<div class="glass-card p-3 rounded-2xl border border-white/10"><div class="flex items-center justify-between gap-2"><div><div class="text-sm font-bold text-white">${escapeHtml(p.name||'Player')} ${p.host?'<span class="text-[9px] text-amber-300">HOST</span>':''}</div><div class="text-[10px] text-slate-500">${p.uid===onlineState.uid?'You':'Online player'}</div></div><div class="font-display text-2xl font-bold text-amber-300">${p.score||0}</div></div>${manualControls(p)}</div>`).join('');
+          document.getElementById('online-player-list').innerHTML=modalRows;
+          const mainList=document.getElementById('main-online-player-list');
+          if(mainList) mainList.innerHTML=mainRows || '<div class="text-xs text-slate-500">No players yet</div>';
+        }
+
+        async function awardManualOnlinePoint(uid, delta){
+          if(!onlineState.host || spellingCheckEnabled || !onlineState.roomRef) return;
+          const ref=onlineState.roomRef.child('players/'+uid+'/score');
+          await ref.transaction(v=>Math.max(0,(v||0)+delta));
+          if(delta>0) playSound('success');
         }
 
         function applyOnlineState(st){
@@ -1018,9 +1214,9 @@
             document.getElementById('verifier-feedback').classList.add('hidden');
             playSound('pop');
           }
-          if(typeof st.minLen==='number' && st.minLen!==minWordLength) applyRemoteMinWordLength(st.minLen);
+          applyOnlineRoomSettings({mode:st.mode, duration:st.duration, minLen:st.minLen, verifier:st.verifier});
           const startBtn=document.getElementById('host-start-online');
-          if(startBtn) startBtn.disabled=!onlineState.host || st.phase==='playing';
+          if(startBtn) startBtn.disabled=false;
           updateOnlineControls();
           if(st.phase==='playing') {
             startOnlineTimer(st);
@@ -1029,6 +1225,23 @@
             if(st.phase==='reveal') { currentTimer=0; updateTimerDisplay(); } else if(typeof st.duration==='number') { currentTimer=st.duration; updateTimerDisplay(); }
             setOnlineStatus(st.phase==='reveal'?'หมดเวลาแล้ว — Host เปิดเฉลยหรือกด NEXT WORD':'รอ Host เริ่มเกม');
           }
+        }
+
+        function applyRemoteGameMode(mode) {
+          const wasActive = onlineState.active;
+          const wasHost = onlineState.host;
+          onlineState.active = false;
+          onlineState.host = true;
+          setGameMode(mode || 'classic');
+          onlineState.active = wasActive;
+          onlineState.host = wasHost;
+        }
+
+        function applyRemoteVerifier(enabled) {
+          spellingCheckEnabled = enabled;
+          const toggle=document.getElementById('toggle-spelling-hint');
+          if(toggle) toggle.checked=enabled;
+          toggleSpellingOption(enabled);
         }
 
         function applyRemoteMinWordLength(len) {
@@ -1056,9 +1269,9 @@
         function startOnlineTimer(st){
           stopOnlineTimer();
           const duration=typeof st.duration==='number'?st.duration:defaultTimer;
-          const startedAt=st.startedAt||Date.now();
+          const startedAt=typeof st.startedAt==='number'?st.startedAt:(Date.now()+firebaseServerOffset);
           const tick=()=>{
-            const elapsed=Math.floor((Date.now()-startedAt)/1000);
+            const elapsed=Math.floor(((Date.now()+firebaseServerOffset)-startedAt)/1000);
             currentTimer=Math.max(0,duration-elapsed);
             updateTimerDisplay();
             if(currentTimer<=0){
@@ -1073,7 +1286,7 @@
           setOnlineStatus('กำลังเล่นรอบ '+(st.round||1)+' — เวลาเดินร่วมกัน');
         }
 
-        function startOnlineGame(){ if(!onlineState.host || !onlineState.roomRef) return; nextPrompt(); }
+        function startOnlineGame(){ enterOnlineGame(); }
 
         async function submitOnlineAnswer(){
           if(!onlineState.roomRef || !onlineState.uid) return;
@@ -1111,7 +1324,7 @@
         }
 
         function copyRoomCode(){ navigator.clipboard?.writeText(onlineState.code||''); setOnlineStatus('คัดลอก Room Code แล้ว'); }
-        async function leaveOnlineRoom(){ try{ if(onlineState.roomRef&&onlineState.uid) await onlineState.roomRef.child('players/'+onlineState.uid).remove(); }catch(e){} stopOnlineTimer(); onlineState.listeners.forEach(u=>u()); Object.assign(onlineState,{active:false,host:false,code:null,roomRef:null,round:0,phase:'offline',listeners:[],timerInterval:null}); updateOnlineControls(); document.getElementById('online-room-panel').classList.add('hidden'); document.getElementById('online-entry').classList.remove('hidden'); document.getElementById('join-panel').classList.add('hidden'); toggleOnlineModal(); setOnlineStatus('ออกจากห้องแล้ว'); }
+        async function leaveOnlineRoom(){ try{ if(onlineState.roomRef&&onlineState.uid) await onlineState.roomRef.child('players/'+onlineState.uid).remove(); }catch(e){} stopOnlineTimer(); onlineState.listeners.forEach(u=>u()); Object.assign(onlineState,{active:false,host:false,code:null,roomRef:null,round:0,phase:'offline',listeners:[],timerInterval:null}); appMode='select'; updateOnlineControls(); updateGameSurfaceForMode(); document.getElementById('online-room-panel').classList.add('hidden'); document.getElementById('online-entry').classList.remove('hidden'); document.getElementById('join-panel').classList.add('hidden'); document.getElementById('host-setup-panel').classList.add('hidden'); toggleOnlineModal(false); document.getElementById('mode-select-screen').classList.remove('hidden'); setOnlineStatus('ออกจากห้องแล้ว'); }
         function escapeHtml(v){ return String(v).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m])); }
 
         window.addEventListener('beforeunload', () => {
